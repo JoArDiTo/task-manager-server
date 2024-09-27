@@ -19,19 +19,12 @@ jobs:
           java-version: '17'
       - name: Build Project
         run: mvn clean install -DskipTests
-      - name: Delete existing version from S3
-        run: |
-          aws s3 rm s3://elasticbeanstalk-us-east-2-396913728093/tasks-server/${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}.zip
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-2
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: "tasks-server"
+          application_name: "Tasks-server"
           environment_name: "Tasks-server-env"
           region: us-east-2
           version_label: ${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}-${{ github.event.head_commit.timestamp }}
