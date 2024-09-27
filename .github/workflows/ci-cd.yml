@@ -1,46 +1,50 @@
 name: Deploy to Elastic Beanstalk
 
 on:
-    push:
-        branches:
-        - main
+  push:
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-    - name: Build Project
-      run: mvn clean install -DskipTests
-    - name: List existing versions in S3
-      run: |
-        aws s3 ls s3://elasticbeanstalk-us-east-2-396913728093/tasks-server/
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-2
-    - name: Delete existing version from S3
-      run: |
-        aws s3 rm s3://elasticbeanstalk-us-east-2-396913728093/tasks-server/${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}.zip
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-2
-    - name: Deploy to EB
-      uses: einaregilsson/beanstalk-deploy@v22
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: "Tasks-server"
-        environment_name: "Tasks-server-env"
-        region: us-east-2
-        version_label: ${{ github.sha }}-${{ github.run_number }}
-        deployment_package: target/todo-server-0.0.1-SNAPSHOT.jar
-        wait_for_deployment: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Build Project
+        run: mvn clean install -DskipTests
+      - name: List existing versions in S3
+        run: |
+          aws s3 ls s3://elasticbeanstalk-us-east-2-396913728093/tasks-server/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-2
+      - name: Delete existing version from S3
+        run: |
+          aws s3 rm s3://elasticbeanstalk-us-east-2-396913728093/tasks-server/${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}.zip
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-2
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: "Tasks-server"
+          environment_name: "Tasks-server-env"
+          region: us-east-2
+          version_label: ${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}-${{ github.event.head_commit.timestamp }}
+          deployment_package: target/todo-server-0.0.1-SNAPSHOT.jar
+          wait_for_deployment: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-2
