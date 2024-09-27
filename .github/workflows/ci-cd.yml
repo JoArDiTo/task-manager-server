@@ -27,5 +27,5 @@ jobs:
         application_name: "tasks-server"
         environment_name: "Tasks-server-env"
         region: us-east-2
-        version_label: ${{ github.sha }}
+        version_label: ${{ github.sha }}-${{ github.run_number }}
         deployment_package: target/todo-server-0.0.1-SNAPSHOT.jar
