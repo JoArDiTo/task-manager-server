@@ -19,6 +19,9 @@ jobs:
         java-version: '17'
     - name: Build Project
       run: mvn clean install -DskipTests
+    - name: Print GitHub SHA
+      run: |
+        echo "Github SHA: ${{ github.sha }}"
     - name: Delete existing version from S3
       run: |
         aws s3 rm s3://elasticbeanstalk-us-east-2-396913728093/tasks-server/${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}.zip
