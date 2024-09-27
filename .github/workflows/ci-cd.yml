@@ -19,6 +19,13 @@ jobs:
         java-version: '17'
     - name: Build Project
       run: mvn clean install -DskipTests
+    - name: List existing versions in S3
+      run: |
+        aws s3 ls s3://elasticbeanstalk-us-east-2-396913728093/tasks-server/
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: us-east-2
     - name: Delete existing version from S3
       run: |
         aws s3 rm s3://elasticbeanstalk-us-east-2-396913728093/tasks-server/${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}.zip
@@ -34,6 +41,6 @@ jobs:
         application_name: "tasks-server"
         environment_name: "Tasks-server-env"
         region: us-east-2
-        version_label: ${{ github.sha }}
+        version_label: ${{ github.sha }}-${{ github.run_number }}
         deployment_package: target/todo-server-0.0.1-SNAPSHOT.jar
         wait_for_deployment: true
