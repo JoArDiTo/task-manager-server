@@ -19,33 +19,6 @@ jobs:
           java-version: '17'
       - name: Build Project
         run: mvn clean install -DskipTests
-      - name: Check if S3 bucket exists
-        id: check_bucket
-        run: |
-          if aws s3 ls "s3://elasticbeanstalk-us-east-2-396913728093" 2>&1 | grep -q 'NoSuchBucket'; then
-            echo "Bucket does not exist."
-            echo "bucket_exists=false" >> $GITHUB_ENV
-          else
-            echo "Bucket exists."
-            echo "bucket_exists=true" >> $GITHUB_ENV
-          fi
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-2
-      - name: Create S3 bucket if not exists
-        if: env.bucket_exists == 'false'
-        run: aws s3 mb s3://elasticbeanstalk-us-east-2-396913728093
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-2
-      - name: Upload to S3
-        run: aws s3 cp target/todo-server-0.0.1-SNAPSHOT.jar s3://elasticbeanstalk-us-east-2-396913728093/Tasks-server/75f1e3e5d1f3305c83f5664a4a33e3c079b9d4ca-18-11079217896-2024-09-27T18-59-17-05-00.zip
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-2
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22
         with:
@@ -53,11 +26,9 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: "Tasks-server"
           environment_name: "Tasks-server-env"
+          version_label: ${{ github.sha }}
           region: us-east-2
-          version_label: ${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}-${{ github.event.head_commit.timestamp }}
-          deployment_package: s3://elasticbeanstalk-us-east-2-396913728093/Tasks-server/75f1e3e5d1f3305c83f5664a4a33e3c079b9d4ca-18-11079217896-2024-09-27T18-59-17-05-00.zip
-          wait_for_deployment: true
-          use_existing_version_if_available: true
+          deployment_package: target/todo-server-0.0.1-SNAPSHOT.jar
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
