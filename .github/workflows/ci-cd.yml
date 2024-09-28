@@ -40,6 +40,12 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: us-east-2
+      - name: Upload to S3
+        run: aws s3 cp target/todo-server-0.0.1-SNAPSHOT.jar s3://elasticbeanstalk-us-east-2-396913728093/Tasks-server/75f1e3e5d1f3305c83f5664a4a33e3c079b9d4ca-18-11079217896-2024-09-27T18-59-17-05-00.zip
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-2
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22
         with:
@@ -49,7 +55,7 @@ jobs:
           environment_name: "Tasks-server-env"
           region: us-east-2
           version_label: ${{ github.sha }}-${{ github.run_number }}-${{ github.run_id }}-${{ github.event.head_commit.timestamp }}
-          deployment_package: target/todo-server-0.0.1-SNAPSHOT.jar
+          deployment_package: s3://elasticbeanstalk-us-east-2-396913728093/Tasks-server/75f1e3e5d1f3305c83f5664a4a33e3c079b9d4ca-18-11079217896-2024-09-27T18-59-17-05-00.zip
           wait_for_deployment: true
           use_existing_version_if_available: true
         env:
